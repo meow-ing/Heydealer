@@ -41,6 +41,14 @@ private extension  CarSearchOptionListViewController {
             collectionView.dequeueConfiguredReusableCell(using: cellRegistraion, for: indexPath, item: item)
         }
         
+        let titleHeaderRegistraion = titleHeaderRegistration()
+        
+        dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
+            guard kind == titleHeaderRegistraion.kind else { return nil }
+            
+            return collectionView.dequeueConfiguredReusableSupplementary(using: titleHeaderRegistraion.registration, for: indexPath)
+        }
+        
         return dataSource
     }
     
@@ -94,6 +102,11 @@ private extension CarSearchOptionListViewController {
         section.interGroupSpacing = 10
         section.contentInsets     = .init(top: 10, leading: 0, bottom: 20, trailing: 0)
         
+        let titleHeadrSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(100))
+        let titleHeader    = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: titleHeadrSize, elementKind: titleHeaderKind(), alignment: .top)
+        
+        section.boundarySupplementaryItems = [titleHeader]
+        
         return .init(section: section)
     }
     
@@ -101,6 +114,18 @@ private extension CarSearchOptionListViewController {
         .init { cell, indexPath, itemIdentifier in
             
         }
+    }
+    
+    func titleHeaderRegistration() -> (registration: UICollectionView.SupplementaryRegistration<CarSearchOptionTitleView>, kind: String) {
+        let kind = titleHeaderKind()
+        
+        return (UICollectionView.SupplementaryRegistration(elementKind: kind, handler: { supplementaryView, elementKind, indexPath in
+            
+        }), kind)
+    }
+    
+    func titleHeaderKind() -> String {
+        String(describing: CarSearchOptionTitleView.self)
     }
     
 }
