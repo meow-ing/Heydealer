@@ -17,3 +17,11 @@ final class CarListViewModel {
         self.getCarListUseCase = GetCardList(repository: CarServiceRepository(dataSource: AppEnvironment.shared.dataSource()))
     }
 }
+
+// MARK: usecase
+extension CarListViewModel {
+    
+    func fetchCarList() {
+        
+    }
+}
