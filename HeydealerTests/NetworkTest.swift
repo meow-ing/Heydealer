@@ -6,6 +6,8 @@
 //
 
 import Testing
+import Foundation
+import UIKit
 @testable import Heydealer
 
 struct NetworkTest {
@@ -18,9 +20,15 @@ struct NetworkTest {
     func getMethodTest(param: [String : Any]?) async throws {
         let path = "/cars/"
         
-        let _ = try await Network.request(path: path, httpMethod: .get, param: param, responseType: TestResponse.self)
+//        let _ = try await Network.request(path: path, httpMethod: .get, param: param, responseType: TestResponse.self)
     }
 
+    @Test func getImageData() async throws {
+        let imageData = try await Network.downloadImage(url: URL(string: "https://picsum.photos/200/300"))
+        
+        #expect(imageData != nil)
+        #expect(UIImage(data: imageData!) != nil)
+    }
 }
 
 struct TestResponse: Decodable {

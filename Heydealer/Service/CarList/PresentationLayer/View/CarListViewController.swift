@@ -30,16 +30,6 @@ extension CarListViewController {
 
         configureUI()
         snapshotInitData()
-        
-        let path = "/cars/"
-        Task {
-            do {
-                let _ = try await Network.request(path: path, httpMethod: .get, param: ["page" : "1"], responseType: TestResponse.self)
-            } catch {
-                throw error
-            }
-        }
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {

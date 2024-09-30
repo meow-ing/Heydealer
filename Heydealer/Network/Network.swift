@@ -26,9 +26,27 @@ struct HTTPConfiguration {
     let httpMethod  : HttpMethod
     let param       : [String: Any]?
 }
+
 final class Network {
     
+    static func downloadImage(url: URL?) async throws -> Data? {
+        guard let url, let urlComps = URLComponents(string: url.absoluteString) else { throw NetworkError.invalidURL }
+        guard let host = urlComps.host else { throw NetworkError.invalidURL }
+        
+        let configuration = HTTPConfiguration(host: host, path: urlComps.path, httpMethod: .get, param: nil)
+        
+        let data = try await request(configuration: configuration)
+        
+        return data
+    }
+    
     static func request<T: Decodable>(configuration: HTTPConfiguration, responseType: T.Type) async throws -> T? {
+        guard let data = try await request(configuration: configuration) else { return nil }
+        
+        return try JSONDecoder().decode(responseType, from: data)
+    }
+    
+    static func request(configuration: HTTPConfiguration) async throws -> Data? {
         guard let url = try url(configuration: configuration) else { throw NetworkError.invalidURL }
         
         var urlRequest = URLRequest(url: url)
@@ -51,11 +69,7 @@ final class Network {
             
             guard let response = data.1 as? HTTPURLResponse, response.statusCode == 200 else { throw NetworkError.serverError }
             
-            do {
-                return try JSONDecoder().decode(responseType, from: data.0)
-            } catch {
-                throw NetworkError.parsingError
-            }
+            return data.0
         } catch {
             switch error {
             case NetworkError.parsingError: throw error
