@@ -61,6 +61,16 @@ private extension  CarListViewController {
     }
 }
 
+// MARK: flow
+private extension CarListViewController {
+    
+    func pushBrandSearchViewController() {
+        let viewController = CarSearchOptionListViewController()
+        
+        navigationController?.pushViewController(viewController, animated: true)
+    }
+}
+
 // MARK: configure ui
 private extension CarListViewController {
     
@@ -170,10 +180,13 @@ private extension CarListViewController {
     }
 }
 
+// MARK: UITextFieldDelegate
 extension CarListViewController: UITextFieldDelegate {
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        false
+        pushBrandSearchViewController()
+        
+        return false
     }
     
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
