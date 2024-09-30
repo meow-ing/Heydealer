@@ -15,24 +15,30 @@ enum NetworkError: Error {
     case parsingError
 }
 
+enum HttpMethod: String {
+    case get  = "GET"
+    case post = "POST"
+}
+
+struct HTTPConfiguration {
+    let host        : String
+    let path        : String
+    let httpMethod  : HttpMethod
+    let param       : [String: Any]?
+}
 final class Network {
     
-    enum HttpMethod: String {
-        case get  = "GET"
-        case post = "POST"
-    }
-    
-    static func request<T: Decodable>(path: String, httpMethod: HttpMethod, param: [String : Any]?, responseType: T.Type) async throws -> T? {
-        guard let url = try url(path: path, httpMethod: httpMethod, param: param) else { throw NetworkError.invalidURL }
+    static func request<T: Decodable>(configuration: HTTPConfiguration, responseType: T.Type) async throws -> T? {
+        guard let url = try url(configuration: configuration) else { throw NetworkError.invalidURL }
         
         var urlRequest = URLRequest(url: url)
         
-        urlRequest.httpMethod = httpMethod.rawValue
+        urlRequest.httpMethod = configuration.httpMethod.rawValue
         
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
         
-        if let param, httpMethod == .post {
+        if let param = configuration.param, configuration.httpMethod == .post {
             do {
                 urlRequest.httpBody = try JSONSerialization.data(withJSONObject: param, options: [])
             } catch {
@@ -59,14 +65,14 @@ final class Network {
         }
     }
     
-    private class func url(path: String, httpMethod: HttpMethod, param: [String : Any]?) throws -> URL? {
+    private class func url(configuration: HTTPConfiguration) throws -> URL? {
         var urlComps = URLComponents()
        
         urlComps.scheme = "https"
-        urlComps.host   = "recruit.heydealer.com"
-        urlComps.path   = path
+        urlComps.host   = configuration.host
+        urlComps.path   = configuration.path
         
-        if let param, httpMethod == .get {
+        if let param = configuration.param, configuration.httpMethod == .get {
             urlComps.queryItems = try param.toGetParam().map({ key, value in
                 URLQueryItem(name: key, value: value)
             })
