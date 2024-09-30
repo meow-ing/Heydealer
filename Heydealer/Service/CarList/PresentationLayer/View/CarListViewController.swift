@@ -8,6 +8,7 @@
 import UIKit
 
 class CarListViewController: UIViewController {
+    typealias Item = CarSummaryViewModel
     
     private lazy var searchButton  : UITextField = { setupSearchButton() }()
     private lazy var collectionView: UICollectionView = { setupCollectionView() }()
@@ -51,11 +52,11 @@ extension CarListViewController {
 // MARK: data
 private extension  CarListViewController {
     
-    func configureDataSource() -> UICollectionViewDiffableDataSource<Int, Int> {
+    func configureDataSource() -> UICollectionViewDiffableDataSource<Int, Item> {
         let highlightCarItemCellRegistraion = highlightCarItemCellRegistration()
         let normalCarItemCellRegistration   = normalCarItemCellRegistration()
                                               
-        let dataSource = UICollectionViewDiffableDataSource<Int, Int>(collectionView: collectionView) { collectionView, indexPath, item in
+        let dataSource = UICollectionViewDiffableDataSource<Int, Item>(collectionView: collectionView) { collectionView, indexPath, item in
             guard indexPath.row % 5 == 0 else {
                 return collectionView.dequeueConfiguredReusableCell(using: normalCarItemCellRegistration, for: indexPath, item: item)
             }
@@ -67,10 +68,10 @@ private extension  CarListViewController {
     }
     
     func snapshotInitData() {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, Int>()
+        var snapshot = NSDiffableDataSourceSnapshot<Int, Item>()
         
         snapshot.appendSections([0])
-        snapshot.appendItems([0, 1, 2, 3, 4, 5])
+        //snapshot.appendItems([0, 1, 2, 3, 4, 5])
         
         dataSource.apply(snapshot)
     }
@@ -182,13 +183,13 @@ private extension CarListViewController {
         return .init(section: section)
     }
     
-    func highlightCarItemCellRegistration() -> UICollectionView.CellRegistration<HighlightCarItemCell, Int> {
+    func highlightCarItemCellRegistration() -> UICollectionView.CellRegistration<HighlightCarItemCell, Item> {
         .init { cell, indexPath, itemIdentifier in
             
         }
     }
     
-    func normalCarItemCellRegistration() -> UICollectionView.CellRegistration<NormalCarItemCell, Int> {
+    func normalCarItemCellRegistration() -> UICollectionView.CellRegistration<NormalCarItemCell, Item> {
         .init { cell, indexPath, itemIdentifier in
             
         }
