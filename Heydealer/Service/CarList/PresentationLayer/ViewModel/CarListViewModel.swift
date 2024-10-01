@@ -42,7 +42,6 @@ extension CarListViewModel {
     }
     
     func fetchCarList(with type: FetchType) -> AnyPublisher<Never, Error> {
-        let pubisher   : AnyPublisher<Void, Error>
         var fetchPage  = 0
         var willSearch = searchText
         

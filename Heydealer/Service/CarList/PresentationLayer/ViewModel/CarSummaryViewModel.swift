@@ -72,7 +72,7 @@ extension CarSummaryViewModel {
         let text = [(unit10000, String(localized: "만")), (unit1000, String(localized: "천")), (unit100, "")].reduce("") { partialResult, unit in
             guard unit.0 > 0 else { return partialResult }
             
-            return partialResult.appending("\(0)\(unit.1)")
+            return partialResult.appending("\(unit.0)\(unit.1)")
         }
         
         return (text.count == 0 ? "" : text).appending("km")
