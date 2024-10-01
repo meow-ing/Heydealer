@@ -56,7 +56,7 @@ private extension  CarListViewController {
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 switch completion {
-                case .failure(let error): break
+                case .failure(_): break //todo bjy: show error alert
                 default: break
                 }
             } receiveValue: { _ in
@@ -180,7 +180,7 @@ private extension CarListViewController {
         let itemHeight = 200.0
         let vSpacing   = 10.0
         
-        let highlightItemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(itemHeight))
+        let highlightItemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(100))
         let highlightItem     = NSCollectionLayoutItem(layoutSize: highlightItemSize)
         
         let normalItemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5), heightDimension: .fractionalHeight(1.0))
@@ -206,7 +206,10 @@ private extension CarListViewController {
     
     func highlightCarItemCellRegistration() -> UICollectionView.CellRegistration<HighlightCarItemCell, Item> {
         .init { cell, indexPath, itemIdentifier in
-            
+            cell.setName(itemIdentifier.name())
+            cell.setYear(itemIdentifier.year())
+            cell.setMilage(itemIdentifier.mileage())
+            cell.setArea(itemIdentifier.area())
         }
     }
     
@@ -229,5 +232,23 @@ extension CarListViewController: UITextFieldDelegate {
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
         true
     }
+    
+}
+
+// MARK: UICollectionViewDelegate
+extension CarListViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        //todo bjy: load more
+        //1. item index 마지막인지 확인
+        //2. 서버에서 totalcount 혹은 다음 페이지 로드 여부 알려주면 loadMore
+        //3. 다음 페이지에 대해서 정보 없으면 일단 loadMore하고 응답 값이 없으면 loadMore lock, 있으면 open loadMore
+        //fetchCarList(with: .loadMore)
+    }
+    
+}
+
+// MARK:
+extension CarListViewController: UIScrollViewDelegate {
     
 }

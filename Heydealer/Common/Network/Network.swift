@@ -20,8 +20,13 @@ enum HttpMethod: String {
     case post = "POST"
 }
 
+enum HTTPHost {
+    case carSearch
+    case custom(String)
+}
+
 struct HTTPConfiguration {
-    let host        : String
+    let host        : HTTPHost
     let path        : String
     let httpMethod  : HttpMethod
     let param       : [String: Any]?
@@ -37,7 +42,7 @@ final class Network {
         
         guard cachedImageData == nil else { return cachedImageData }
         
-        let configuration = HTTPConfiguration(host: host, path: urlComps.path, httpMethod: .get, param: nil)
+        let configuration = HTTPConfiguration(host: .custom(host), path: urlComps.path, httpMethod: .get, param: nil)
         
         let data = try await request(configuration: configuration)
         
@@ -91,8 +96,12 @@ final class Network {
         var urlComps = URLComponents()
        
         urlComps.scheme = "https"
-        urlComps.host   = configuration.host
         urlComps.path   = configuration.path
+        
+        switch configuration.host {
+        case .carSearch       : urlComps.host = "recruit.heydealer.com"
+        case .custom(let host): urlComps.host = host
+        }
         
         if let param = configuration.param, configuration.httpMethod == .get {
             urlComps.queryItems = try param.toGetParam().map({ key, value in
