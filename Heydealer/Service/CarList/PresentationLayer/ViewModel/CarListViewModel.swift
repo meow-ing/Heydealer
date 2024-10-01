@@ -70,6 +70,12 @@ extension CarListViewModel {
             .eraseToAnyPublisher()
     }
     
+    func canLoadMore(at itemIndex: Int) -> Bool {
+        guard let carSummaryViewModelList, !carSummaryViewModelList.isEmpty else { return false }
+        
+        return itemIndex == carSummaryViewModelList.count - 1
+    }
+    
     private func fetchInitCarList() -> AnyPublisher<Void, Error> {
         guard carSummaryViewModelList == nil else {
             return Just(())
@@ -85,7 +91,7 @@ extension CarListViewModel {
         getCarListUseCase.excute()
             .receive(on: DispatchQueue.main)
             .map { [weak self] data in
-                self?.didFetchData(data, append: page == 0)
+                self?.didFetchData(data, append: page > 0)
                 return
             }
             .eraseToAnyPublisher()

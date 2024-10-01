@@ -29,7 +29,13 @@ class CarServiceRepository: CarServiceRepositoryInterface {
                             throw NetworkError.invalidData
                         }
                         
-                        return .init(info: .init(name: name, area: area, year: year, mileage: mileage, fuel: CarFuel(rawValue: fuel)), image: URL(string: dto.image ?? ""))
+                        var aution: CarAution?
+                        
+                        if let autionStatus = CarAutionStatus(rawValue: dto.status ?? "") {
+                            aution = .init(status: autionStatus, highestPrice: nil, customerCount: nil, registDate: nil, startDate: nil, expireDate: dto.expire_at?.date())
+                        }
+                        
+                        return .init(info: .init(name: name, area: area, year: year, mileage: mileage, fuel: CarFuel(rawValue: fuel)), image: URL(string: dto.image ?? ""), aution: aution)
                     } as [CarSummary]
                     
                     promise(.success(list))

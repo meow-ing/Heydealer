@@ -4,19 +4,52 @@
 //
 //  Created by 지윤 on 10/1/24.
 //
+import Foundation
+import UIKit
+import Combine
 
 class CarSummaryViewModel: Hashable {
     let identifier: Int
     let data      : CarSummary
     
+    @Published var autionStatus: (name: String, color: UIColor)?
+        
     init(identifier: Int, data: CarSummary) {
         self.identifier = identifier
         self.data       = data
+        
+        guard let aution = data.aution else { return }
+        
+        updateAutionStatus(aution.status)
     }
 }
 
 // MARK: display
 extension CarSummaryViewModel {
+    
+    func autionTimeStamp() -> AnyPublisher<String?, Never>? {
+        guard let aution = data.aution, aution.status == .approved, let date = aution.expireDate else { return nil }
+        guard date.timeIntervalSinceNow > 0 else { return nil }
+        
+        return Timer.publish(every: 1.0, on: .main, in: .common)
+            .autoconnect()
+            .map({ [weak self] _ in
+                let interval = date.timeIntervalSinceNow
+                
+                guard interval > 0 else {
+                    self?.updateAutionStatus(.expired)
+                    return nil
+                }
+                
+                let time    = NSInteger(interval)
+                let seconds = time % 60
+                let minutes = (time / 60) % 60
+                let hours   = (time / 3600)
+
+                return String(format: "%0.2d:%0.2d:%0.2d", hours, minutes, seconds)
+            }).eraseToAnyPublisher()
+        
+    }
     
     func summary() -> String {
         [year(), mileage(), area()].joined(separator: "‧")
@@ -48,6 +81,11 @@ extension CarSummaryViewModel {
     func area() -> String {
         data.info.area
     }
+    
+    private func updateAutionStatus(_ status: CarAutionStatus) {
+        autionStatus = (status.name, status.color)
+    }
+    
 }
 
 // MARK: Hashable

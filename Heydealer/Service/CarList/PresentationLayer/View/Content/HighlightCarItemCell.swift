@@ -12,13 +12,15 @@ class HighlightCarItemCell: UICollectionViewCell {
     
     private lazy var hStackView     : UIStackView = { setupHStackView() }()
     private lazy var imageView      : UIImageView = { setupImageView()} ()
+            lazy var statusView     : CarItemStatusView = { setupStatusView() }()
     private lazy var infoBoxView    : UIView = { setupInfoBoxView() }()
     private lazy var nameLabel      : UILabel = { setupNameLabel() }()
     private lazy var yearLabel      : UILabel = { setupInfoLabel() }()
     private lazy var mileageLabel   : UILabel = { setupInfoLabel() }()
     private lazy var areaLabel      : UILabel = { setupInfoLabel() }()
     
-    private var timerCancellable: AnyCancellable?
+    private var autionStatusCancel: AnyCancellable?
+    private var autionTimerCancel : AnyCancellable?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -33,12 +35,52 @@ class HighlightCarItemCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        autionStatusCancel?.cancel()
+        autionTimerCancel?.cancel()
+        
+        statusView.reset()
+        
+        statusView.isHidden = true
+        imageView.image     = nil
+        nameLabel.text      = nil
+        yearLabel.text      = nil
+        mileageLabel.text   = nil
+        areaLabel.text      = nil
+    }
 }
 // MARK: public
 extension HighlightCarItemCell {
     
-    func bindingTime<T>(_ publisher: Published<T>.Publisher) {
+    func bindingAutionStatus(_ publisher: Published<(name: String, color: UIColor)?>.Publisher?) {
+        autionStatusCancel?.cancel()
         
+        autionStatusCancel = publisher?
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] status in
+            guard let self, let status else { return }
+                self.statusView.isHidden        = false
+                self.statusView.backgroundColor = status.color
+                self.statusView.setStatus(status.name)
+        })
+    }
+    
+    func bindingAutionTimeer(_ publisher: AnyPublisher<String?, Never>?) {
+        autionTimerCancel?.cancel()
+        
+        autionTimerCancel = publisher?
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] timeStamp in
+                guard let timeStamp else { return }
+                
+                self?.statusView.setTime(timeStamp)
+            }
+    }
+    
+    func setImage(_ url: URL?) {
+        imageView.loadImage(from: url)
     }
     
     func setName(_ name: String) {
@@ -68,6 +110,8 @@ private extension HighlightCarItemCell {
         hStackView.addArrangedSubview(imageView)
         hStackView.addArrangedSubview(infoBoxView)
 
+        imageView.addSubview(statusView)
+        
         infoBoxView.addSubview(nameLabel)
         infoBoxView.addSubview(yearLabel)
         infoBoxView.addSubview(mileageLabel)
@@ -90,8 +134,14 @@ private extension HighlightCarItemCell {
         let view = UIImageView()
         
         view.translatesAutoresizingMaskIntoConstraints = false
+                
+        return view
+    }
+    
+    func setupStatusView() -> CarItemStatusView {
+        let view = CarItemStatusView()
         
-        view.backgroundColor = .blue
+        view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
     }
@@ -102,6 +152,7 @@ private extension HighlightCarItemCell {
         view.translatesAutoresizingMaskIntoConstraints = false
         
         view.backgroundColor = .clear
+        
         return view
     }
     
@@ -111,7 +162,8 @@ private extension HighlightCarItemCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         
         label.numberOfLines = 2
-        label.font          = .boldSystemFont(ofSize: 13)
+        label.font          = .boldSystemFont(ofSize: 18)
+        label.lineBreakMode = .byTruncatingTail
         
         return label
     }
@@ -137,8 +189,16 @@ private extension HighlightCarItemCell {
             hStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
         ])
         
+        let imageHeight = imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor)
+        
+        imageHeight.priority = .init(rawValue: 999)
+        
         NSLayoutConstraint.activate([
-            imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor)
+            imageHeight,
+            
+            statusView.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
+            statusView.trailingAnchor.constraint(equalTo: imageView.trailingAnchor),
+            statusView.bottomAnchor.constraint(equalTo: imageView.bottomAnchor)
         ])
         
         NSLayoutConstraint.activate([

@@ -5,6 +5,7 @@
 //  Created by 지윤 on 10/1/24.
 //
 import Foundation
+import UIKit
 
 enum CarFuel: String {
     case gasoline, diesel, lpg, electric, hybrid, bifuel
@@ -22,15 +23,22 @@ enum CarFuel: String {
 }
 
 enum CarAutionStatus: String {
-    case approved, ended, expired
+    case approved, expired //경매 종료는 필터링, 앱에서 신경쓰지 않는다.
     
     var name: String {
         switch self {
         case .approved  : return String(localized: "경매중")
-        case .ended     : return String(localized: "경매종료")
         case .expired   : return String(localized: "유효기간만료")
         }
     }
+    
+    var color: UIColor {
+        switch self {
+        case .approved  : return .blue
+        case .expired   : return .gray
+        }
+    }
+    
 }
 
 struct Car {
@@ -42,13 +50,12 @@ struct Car {
 }
 
 struct CarAution {
-    let status: CarAutionStatus?
+    let status: CarAutionStatus
     
     let highestPrice  : Int64?
     let customerCount: Int?
     
-    let registDate   : Date
-    let startDate    : Date
-    let endExpectDate: Date
-    let leftDate     : Date?
+    let registDate   : Date?
+    let startDate    : Date?
+    let expireDate   : Date?
 }

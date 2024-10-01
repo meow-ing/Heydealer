@@ -108,6 +108,17 @@ private extension CarListViewController {
     }
 }
 
+// MARK: action
+private extension CarListViewController {
+    
+    @objc func pullToRefresh(sender: UIRefreshControl) {
+        fetchCarList(with: .refresh)
+        
+        sender.endRefreshing()
+    }
+    
+}
+
 // MARK: configure ui
 private extension CarListViewController {
     
@@ -169,6 +180,11 @@ private extension CarListViewController {
         
         view.translatesAutoresizingMaskIntoConstraints = false
         
+        view.delegate = self
+        
+        view.refreshControl = UIRefreshControl()
+        view.refreshControl?.addTarget(self, action: #selector(pullToRefresh(sender:)), for: .valueChanged)
+        
         return view
     }
 }
@@ -206,6 +222,10 @@ private extension CarListViewController {
     
     func highlightCarItemCellRegistration() -> UICollectionView.CellRegistration<HighlightCarItemCell, Item> {
         .init { cell, indexPath, itemIdentifier in
+            cell.bindingAutionStatus(itemIdentifier.$autionStatus)
+            cell.bindingAutionTimeer(itemIdentifier.autionTimeStamp())
+            
+            cell.setImage(itemIdentifier.data.image)
             cell.setName(itemIdentifier.name())
             cell.setYear(itemIdentifier.year())
             cell.setMilage(itemIdentifier.mileage())
@@ -239,16 +259,9 @@ extension CarListViewController: UITextFieldDelegate {
 extension CarListViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        //todo bjy: load more
-        //1. item index 마지막인지 확인
-        //2. 서버에서 totalcount 혹은 다음 페이지 로드 여부 알려주면 loadMore
-        //3. 다음 페이지에 대해서 정보 없으면 일단 loadMore하고 응답 값이 없으면 loadMore lock, 있으면 open loadMore
-        //fetchCarList(with: .loadMore)
-    }
-    
-}
+        guard viewModel.canLoadMore(at: indexPath.row) else { return }
 
-// MARK:
-extension CarListViewController: UIScrollViewDelegate {
+        fetchCarList(with: .loadMore)
+    }
     
 }

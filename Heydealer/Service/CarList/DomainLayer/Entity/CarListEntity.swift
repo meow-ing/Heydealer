@@ -8,6 +8,7 @@
 import Foundation
 
 struct CarSummary {
-    let info: Car
-    let image: URL?
+    let info  : Car
+    let image : URL?
+    let aution: CarAution?
 }
