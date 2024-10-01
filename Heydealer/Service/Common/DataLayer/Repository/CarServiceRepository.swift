@@ -57,6 +57,8 @@ class CarServiceRepository: CarServiceRepositoryInterface {
                     let list = dtoList.map {
                         .init(name: $0.name, count: $0.count, optionID: $0.id)
                     } as [CarSearchOptionItem]
+                    
+                    promise(.success(list))
                 } catch {
                     return promise(.failure(error))
                 }
@@ -75,6 +77,8 @@ class CarServiceRepository: CarServiceRepositoryInterface {
                     let list = dtoList.map {
                         .init(name: $0.name, count: $0.count, optionID: $0.id)
                     } as [CarSearchOptionItem]
+                    
+                    promise(.success(list))
                 } catch {
                     return promise(.failure(error))
                 }
@@ -93,6 +97,8 @@ class CarServiceRepository: CarServiceRepositoryInterface {
                     let list = dtoList.map {
                         .init(name: $0.name, count: $0.count, optionID: $0.id)
                     } as [CarSearchOptionItem]
+                    
+                    promise(.success(list))
                 } catch {
                     return promise(.failure(error))
                 }

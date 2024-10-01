@@ -13,11 +13,6 @@ struct CarListSearchOption {
     let searchModelID: String
 }
 
-struct CardListSearchConfiguration {
-    let option: CarListSearchOption
-    let data  : [CarSummary]?
-}
-
 final class CarListViewModel {
     
     @Published var carSummaryViewModelList: [CarSummaryViewModel]?
@@ -27,15 +22,13 @@ final class CarListViewModel {
     private var searchOption     : CarListSearchOption?
     private var page             = 0
     
-    init(searchConfiguration: CardListSearchConfiguration? = nil) {
+    init(searchOption: CarListSearchOption? = nil) {
         self.getCarListUseCase = GetCardList(repository: CarServiceRepository(dataSource: AppEnvironment.shared.dataSource()))
         
-        guard let searchConfiguration else { return }
+        guard let searchOption else { return }
         
-        self.searchOption = searchConfiguration.option
-        self.searchText   = searchConfiguration.option.searchText
-        
-        didFetchData(searchConfiguration.data)
+        self.searchOption = searchOption
+        self.searchText   = searchOption.searchText
     }
     
 }

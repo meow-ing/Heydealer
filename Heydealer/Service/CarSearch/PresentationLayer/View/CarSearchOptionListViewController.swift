@@ -38,7 +38,7 @@ extension CarSearchOptionListViewController {
         configureUI()
         bindViewModel()
         
-        viewModel.fetchOptionList()
+        fetchOptionList()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -65,9 +65,24 @@ private extension  CarSearchOptionListViewController {
                 
                 switch flow {
                 case .nextOption(let vm)  : self.pushNextSearchOptionListViewController(vm)
-                case .finishOption(let vm): break
+                case .finishOption(let vm): self.pushCarListViewController(vm)
                 }
             }.store(in: &cancelBags)
+    }
+    
+    func fetchOptionList() {
+        viewModel.fetchOptionList()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                switch completion {
+                case .failure(_) : self?.navigationController?.popViewController(animated: true) //todo bjy: 얼럿 보여줘야하지만 패스
+                    
+                default: break
+                }
+            } receiveValue: { _ in
+                
+            }.store(in: &cancelBags)
+
     }
 }
 
@@ -144,6 +159,8 @@ private extension CarSearchOptionListViewController {
         
         view.translatesAutoresizingMaskIntoConstraints = false
         
+        view.delegate = self
+        
         return view
     }
 }
@@ -189,6 +206,15 @@ private extension CarSearchOptionListViewController {
     
     func titleHeaderKind() -> String {
         String(describing: CarSearchOptionTitleView.self)
+    }
+    
+}
+
+// MARK: UICollectionViewDelegate
+extension CarSearchOptionListViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        try? viewModel.didSelectOption(at: indexPath.row)
     }
     
 }
