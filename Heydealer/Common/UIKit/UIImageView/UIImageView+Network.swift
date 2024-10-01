@@ -16,11 +16,16 @@ extension UIImageView {
                     return
                 }
                 
+                var fetchImage: UIImage? = loadImage
+                
                 if let thumbnailSize {
-                    image = await loadImage.byPreparingThumbnail(ofSize: thumbnailSize)
-                } else {
-                    image = loadImage
+                    fetchImage = await loadImage.byPreparingThumbnail(ofSize: thumbnailSize)
                 }
+                
+                await MainActor.run {
+                    image = fetchImage ?? loadImage
+                }
+                
             } catch {
                 throw error
             }

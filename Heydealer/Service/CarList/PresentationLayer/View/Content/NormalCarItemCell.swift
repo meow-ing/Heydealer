@@ -142,12 +142,16 @@ private extension NormalCarItemCell {
 private extension NormalCarItemCell {
     
     func setConstraintsOfSubviews() {
+        let imageBottom = imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -50)
+        
+        imageBottom.priority = .init(999)
+        
         NSLayoutConstraint.activate([
             imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             imageView.heightAnchor.constraint(equalTo: contentView.widthAnchor),
             imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -50),
+            imageBottom,
             
             statusView.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
             statusView.trailingAnchor.constraint(equalTo: imageView.trailingAnchor),
