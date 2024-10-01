@@ -193,21 +193,20 @@ private extension CarListViewController {
 private extension CarListViewController {
     
     func collectionViewLayout() -> UICollectionViewCompositionalLayout {
-        let itemHeight = 200.0
-        let vSpacing   = 10.0
+        let vSpacing = 10.0
         
         let highlightItemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(100))
         let highlightItem     = NSCollectionLayoutItem(layoutSize: highlightItemSize)
         
-        let normalItemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5), heightDimension: .fractionalHeight(1.0))
+        let normalItemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5), heightDimension: .estimated(100))
         let normalItem     = NSCollectionLayoutItem(layoutSize: normalItemSize)
         
-        let normalItemGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(itemHeight))
+        let normalItemGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(100))
         let normalItemGroup     = NSCollectionLayoutGroup.horizontal(layoutSize: normalItemGroupSize, subitems: [normalItem])
         
         normalItemGroup.interItemSpacing = .fixed(10)
         
-        let itemStylePatternGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(100))
+        let itemStylePatternGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(300))
         let itemStylePatternGroup     = NSCollectionLayoutGroup.vertical(layoutSize: itemStylePatternGroupSize, subitems: [highlightItem, normalItemGroup, normalItemGroup])
         
         itemStylePatternGroup.interItemSpacing = .fixed(vSpacing)
@@ -235,7 +234,12 @@ private extension CarListViewController {
     
     func normalCarItemCellRegistration() -> UICollectionView.CellRegistration<NormalCarItemCell, Item> {
         .init { cell, indexPath, itemIdentifier in
+            cell.bindingAutionStatus(itemIdentifier.$autionStatus)
+            cell.bindingAutionTimeer(itemIdentifier.autionTimeStamp())
             
+            cell.setImage(itemIdentifier.data.image)
+            cell.setName(itemIdentifier.name())
+            cell.setSummary(itemIdentifier.summary())
         }
     }
 }

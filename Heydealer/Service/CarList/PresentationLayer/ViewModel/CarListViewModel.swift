@@ -100,7 +100,9 @@ extension CarListViewModel {
     private func didFetchData(_ data: [CarSummary]?, append: Bool = false) {
         let oldTotalCount = append ? carSummaryViewModelList?.count ?? 0 : 0
         let convertList   = data?.enumerated().map { [oldTotalCount] car in
-                .init(identifier: oldTotalCount + car.offset, data: car.element)
+            let id = "(\(oldTotalCount + car.offset))".appending(String(Date().timeIntervalSinceNow))
+            
+             return .init(identifier: id, data: car.element)
         } as [CarSummaryViewModel]?
         
         guard let oldList = carSummaryViewModelList, append else {

@@ -9,12 +9,12 @@ import UIKit
 import Combine
 
 class CarSummaryViewModel: Hashable {
-    let identifier: Int
+    let identifier: String
     let data      : CarSummary
     
     @Published var autionStatus: (name: String, color: UIColor)?
         
-    init(identifier: Int, data: CarSummary) {
+    init(identifier: String, data: CarSummary) {
         self.identifier = identifier
         self.data       = data
         
