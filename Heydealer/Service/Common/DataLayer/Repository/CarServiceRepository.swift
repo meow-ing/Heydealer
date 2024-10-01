@@ -25,11 +25,11 @@ class CarServiceRepository: CarServiceRepositoryInterface {
                     }
                     
                     let list = try dtoList.map { dto in
-                        guard let name = dto.name, let area = dto.area, let year = dto.year, let fuel = dto.fuel else {
+                        guard let name = dto.name, let area = dto.area, let year = dto.year, let mileage = dto.mileage, let fuel = dto.fuel else {
                             throw NetworkError.invalidData
                         }
                         
-                        return .init(info: .init(name: name, area: area, year: year, fuel: CarFuel(rawValue: fuel)), image: URL(string: dto.image ?? ""))
+                        return .init(info: .init(name: name, area: area, year: year, mileage: mileage, fuel: CarFuel(rawValue: fuel)), image: URL(string: dto.image ?? ""))
                     } as [CarSummary]
                     
                     promise(.success(list))

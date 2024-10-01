@@ -34,10 +34,11 @@ enum CarAutionStatus: String {
 }
 
 struct Car {
-    let name: String
-    let area: String
-    let year: String
-    let fuel: CarFuel?
+    let name    : String
+    let area    : String
+    let year    : String
+    let mileage : Int
+    let fuel    : CarFuel?
 }
 
 struct CarAution {

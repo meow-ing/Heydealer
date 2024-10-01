@@ -14,7 +14,7 @@ class GetCardList {
         self.repository = repository
     }
     
-    func excute() -> AnyPublisher<[CarSummary]?, Error>? {
+    func excute() -> AnyPublisher<[CarSummary]?, Error> {
         repository.fetchCarList()
     }
 }

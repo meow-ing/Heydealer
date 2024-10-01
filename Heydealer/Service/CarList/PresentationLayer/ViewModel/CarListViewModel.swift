@@ -6,22 +6,102 @@
 //
 
 import Foundation
+import Combine
+
+struct CarListSearchOption {
+    let searchText   : String
+    let searchModelID: String
+}
+
+struct CardListSearchConfiguration {
+    let option: CarListSearchOption
+    let data  : [CarSummary]?
+}
 
 final class CarListViewModel {
     
     @Published var carSummaryViewModelList: [CarSummaryViewModel]?
+    @Published var searchText             : String?
     
     private let getCarListUseCase: GetCardList
+    private var searchOption     : CarListSearchOption?
+    private var page             = 0
     
-    init() {
+    init(searchConfiguration: CardListSearchConfiguration? = nil) {
         self.getCarListUseCase = GetCardList(repository: CarServiceRepository(dataSource: AppEnvironment.shared.dataSource()))
+        
+        guard let searchConfiguration else { return }
+        
+        self.searchOption = searchConfiguration.option
+        self.searchText   = searchConfiguration.option.searchText
+        
+        didFetchData(searchConfiguration.data)
     }
+    
 }
 
 // MARK: usecase
 extension CarListViewModel {
     
-    func fetchCarList() {
+    enum FetchType {
+        case first, refresh, loadMore
+    }
+    
+    func fetchCarList(with type: FetchType) -> AnyPublisher<Never, Error> {
+        let pubisher  : AnyPublisher<Void, Error>
+        var fetchPage = 0
         
+        switch type {
+        case .first:
+            pubisher = fetchInitCarList()
+        case .refresh:
+            pubisher = fetchCarList(at: fetchPage)
+        case .loadMore:
+            fetchPage = page + 1
+            pubisher  = fetchCarList(at: fetchPage)
+        }
+        
+        return pubisher
+            .receive(on: DispatchQueue.main)
+            .map { [weak self] _ in
+                self?.page = fetchPage
+            }
+            .ignoreOutput()
+            .eraseToAnyPublisher()
+    }
+    
+    private func fetchInitCarList() -> AnyPublisher<Void, Error> {
+        guard carSummaryViewModelList == nil else {
+            return Just(())
+                .setFailureType(to: Error.self)
+                .eraseToAnyPublisher()
+        }
+        
+        return fetchCarList(at: 0)
+    }
+    
+    
+    private func fetchCarList(at page: Int) -> AnyPublisher<Void, Error> {
+        getCarListUseCase.excute()
+            .receive(on: DispatchQueue.main)
+            .map { [weak self] data in
+                self?.didFetchData(data, append: page == 0)
+                return
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    private func didFetchData(_ data: [CarSummary]?, append: Bool = false) {
+        let oldTotalCount = append ? carSummaryViewModelList?.count ?? 0 : 0
+        let convertList   = data?.enumerated().map { [oldTotalCount] car in
+                .init(identifier: oldTotalCount + car.offset, data: car.element)
+        } as [CarSummaryViewModel]?
+        
+        guard let oldList = carSummaryViewModelList, append else {
+            carSummaryViewModelList = convertList
+            return
+        }
+        
+        carSummaryViewModelList = oldList + (convertList ?? [])
     }
 }

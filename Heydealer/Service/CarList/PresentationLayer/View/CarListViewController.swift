@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 class CarListViewController: UIViewController {
     typealias Item = CarSummaryViewModel
@@ -14,6 +15,9 @@ class CarListViewController: UIViewController {
     private lazy var collectionView: UICollectionView = { setupCollectionView() }()
     
     private lazy var dataSource = { configureDataSource() }()
+    
+    private let viewModel  = CarListViewModel()
+    private var cancelBags = Set<AnyCancellable>()
 
 }
 
@@ -24,7 +28,9 @@ extension CarListViewController {
         super.viewDidLoad()
 
         configureUI()
-        snapshotInitData()
+        bindViewModel()
+        
+        fetchCarList(with: .first)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -32,6 +38,33 @@ extension CarListViewController {
         
         navigationController?.setNavigationBarHidden(true, animated: animated)
     }
+}
+
+// MARK: view model
+private extension  CarListViewController {
+    
+    func bindViewModel() {
+        viewModel.$carSummaryViewModelList
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] data in
+                self?.snapshotData(data)
+            }.store(in: &cancelBags)
+    }
+    
+    func fetchCarList(with type: CarListViewModel.FetchType) {
+        viewModel.fetchCarList(with: type)
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .failure(let error): break
+                default: break
+                }
+            } receiveValue: { _ in
+            }
+            .store(in: &cancelBags)
+
+    }
+    
 }
 
 // MARK: data
@@ -52,11 +85,14 @@ private extension  CarListViewController {
         return dataSource
     }
     
-    func snapshotInitData() {
+    func snapshotData(_ data: [Item]?) {
         var snapshot = NSDiffableDataSourceSnapshot<Int, Item>()
         
         snapshot.appendSections([0])
-        //snapshot.appendItems([0, 1, 2, 3, 4, 5])
+        
+        if let data {
+            snapshot.appendItems(data)
+        }
         
         dataSource.apply(snapshot)
     }
