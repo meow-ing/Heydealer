@@ -6,12 +6,25 @@
 //
 
 import UIKit
+import Combine
 
 class CarSearchOptionListViewController: UIViewController {
 
     private lazy var collectionView: UICollectionView = { setupCollectionView() }()
+    private lazy var dataSource    = { configureDataSource() }()
+
+    private let viewModel: CardSearchOptionListViewModelInterface
     
-    private lazy var dataSource = { configureDataSource() }()
+    init(viewModel: CardSearchOptionListViewModelInterface) {
+        self.viewModel = viewModel
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
 }
 
 // MARK: override

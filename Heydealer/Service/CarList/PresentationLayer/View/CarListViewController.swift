@@ -102,7 +102,7 @@ private extension  CarListViewController {
 private extension CarListViewController {
     
     func pushBrandSearchViewController() {
-        let viewController = CarSearchOptionListViewController()
+        let viewController = CarSearchOptionListViewController(viewModel: viewModel.searchOptionBarandListViewModel())
         
         navigationController?.pushViewController(viewController, animated: true)
     }

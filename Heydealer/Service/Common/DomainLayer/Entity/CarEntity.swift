@@ -23,7 +23,7 @@ enum CarFuel: String {
 }
 
 enum CarAutionStatus: String {
-    case approved, expired //경매 종료는 필터링, 앱에서 신경쓰지 않는다.
+    case approved, expired //힘드니까 2개만 관리
     
     var name: String {
         switch self {

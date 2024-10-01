@@ -113,3 +113,12 @@ extension CarListViewModel {
         carSummaryViewModelList = oldList + (convertList ?? [])
     }
 }
+
+// MARK: view model
+extension CarListViewModel {
+    
+    func searchOptionBarandListViewModel() -> CardSearchOptionListViewModelInterface {
+        CardSearchOptionBrandListViewModel()
+    }
+}
+
