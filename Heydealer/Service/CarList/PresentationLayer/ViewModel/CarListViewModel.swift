@@ -38,26 +38,28 @@ extension CarListViewModel {
     
     enum FetchType {
         case first, refresh, loadMore
+        case search(String?)
     }
     
     func fetchCarList(with type: FetchType) -> AnyPublisher<Never, Error> {
-        let pubisher  : AnyPublisher<Void, Error>
-        var fetchPage = 0
+        let pubisher   : AnyPublisher<Void, Error>
+        var fetchPage  = 0
+        var willSearch = searchText
         
         switch type {
-        case .first:
-            pubisher = fetchInitCarList()
-        case .refresh:
-            pubisher = fetchCarList(at: fetchPage)
-        case .loadMore:
-            fetchPage = page + 1
-            pubisher  = fetchCarList(at: fetchPage)
+        case .loadMore        : fetchPage  = page + 1
+        case .search(let text): willSearch = text
+            
+        default: break
         }
         
-        return pubisher
+        return fetchCarList(at: fetchPage, searchText: willSearch)
             .receive(on: DispatchQueue.main)
             .map { [weak self] _ in
-                self?.page = fetchPage
+                self?.page       = fetchPage
+                self?.searchText = willSearch
+                
+                return
             }
             .ignoreOutput()
             .eraseToAnyPublisher()
@@ -69,19 +71,8 @@ extension CarListViewModel {
         return itemIndex == carSummaryViewModelList.count - 1
     }
     
-    private func fetchInitCarList() -> AnyPublisher<Void, Error> {
-        guard carSummaryViewModelList == nil else {
-            return Just(())
-                .setFailureType(to: Error.self)
-                .eraseToAnyPublisher()
-        }
-        
-        return fetchCarList(at: 0)
-    }
-    
-    
-    private func fetchCarList(at page: Int) -> AnyPublisher<Void, Error> {
-        getCarListUseCase.excute()
+    private func fetchCarList(at page: Int, searchText: String?) -> AnyPublisher<Void, Error> {
+        getCarListUseCase.excute(page: page, searchText: searchText)
             .receive(on: DispatchQueue.main)
             .map { [weak self] data in
                 self?.didFetchData(data, append: page > 0)
@@ -105,6 +96,8 @@ extension CarListViewModel {
         
         carSummaryViewModelList = oldList + (convertList ?? [])
     }
+    
+    
 }
 
 // MARK: view model

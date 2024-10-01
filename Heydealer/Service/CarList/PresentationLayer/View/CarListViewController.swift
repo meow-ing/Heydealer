@@ -59,6 +59,12 @@ private extension  CarListViewController {
             .sink { [weak self] data in
                 self?.snapshotData(data)
             }.store(in: &cancelBags)
+        
+        viewModel.$searchText
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] text in
+                self?.searchButton.text = text
+            }.store(in: &cancelBags)
     }
     
     func fetchCarList(with type: CarListViewModel.FetchType) {
@@ -66,7 +72,7 @@ private extension  CarListViewController {
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 switch completion {
-                case .failure(_): break //todo bjy: show error alert
+                case .failure(_): break //todo bjy: show error alert, 힘들어서 에러처리 도저히 못하겠다, 메인 화면이어서 새로고침 뷰 필요.
                 default: break
                 }
             } receiveValue: { _ in
@@ -264,7 +270,8 @@ extension CarListViewController: UITextFieldDelegate {
     }
     
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
-        true
+        fetchCarList(with: .search(nil))
+        return false
     }
     
 }
