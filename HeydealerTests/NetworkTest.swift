@@ -18,19 +18,24 @@ struct NetworkTest {
         ["page" : 1],
         ["page" : [0, 1, 2]]])
     func getMethodTest(param: [String : Any]?) async throws {
-        let path = "/cars/"
+        //let path = "/cars/"
         
 //        let _ = try await Network.request(path: path, httpMethod: .get, param: param, responseType: TestResponse.self)
     }
 
     @Test func getImageData() async throws {
-        let imageData = try await Network.downloadImage(url: URL(string: "https://picsum.photos/200/300"))
+        let url = URL(string: "https://picsum.photos/200/300")
+        
+        ImageCache.clear()
+        
+        let imageData = try await Network.downloadImage(url:url)
+        
+        #expect(imageData != nil)
+        #expect(UIImage(data: imageData!) != nil)
+        
+        let cachedImageData = try await Network.downloadImage(url: url)
         
         #expect(imageData != nil)
         #expect(UIImage(data: imageData!) != nil)
     }
-}
-
-struct TestResponse: Decodable {
-    
 }

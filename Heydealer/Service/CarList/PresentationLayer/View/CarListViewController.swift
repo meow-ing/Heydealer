@@ -17,11 +17,6 @@ class CarListViewController: UIViewController {
 
 }
 
-struct TestResponse: Decodable {
-    
-}
-
-
 // MARK: override
 extension CarListViewController {
     
