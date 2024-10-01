@@ -21,3 +21,9 @@ struct CarDTO: Decodable {
     let expire_at: String?
     let initial_registration_date: String?
 }
+
+struct CarSearchOptionDTO: Decodable {
+    let name : String
+    let count: Int
+    let id   : String
+}

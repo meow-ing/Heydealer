@@ -46,4 +46,58 @@ class CarServiceRepository: CarServiceRepositoryInterface {
         }.eraseToAnyPublisher()
     }
     
+    func fetchSearchOptionBrandList() -> AnyPublisher<[CarSearchOptionItem]?, Error> {
+        Future<[CarSearchOptionItem]?, Error> { promise in
+            Task {
+                do {
+                    guard let dtoList = try await self.dataSource.fetchSearchOptionBrandList() else {
+                        return promise(.success(nil))
+                    }
+                    
+                    let list = dtoList.map {
+                        .init(name: $0.name, count: $0.count, optionID: $0.id)
+                    } as [CarSearchOptionItem]
+                } catch {
+                    return promise(.failure(error))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func fetchSearchOptionModelGroupList(for brandID: String) -> AnyPublisher<[CarSearchOptionItem]?, Error> {
+        Future<[CarSearchOptionItem]?, Error> { promise in
+            Task {
+                do {
+                    guard let dtoList = try await self.dataSource.fetchSearchOptionModelGroupList(for: brandID) else {
+                        return promise(.success(nil))
+                    }
+                    
+                    let list = dtoList.map {
+                        .init(name: $0.name, count: $0.count, optionID: $0.id)
+                    } as [CarSearchOptionItem]
+                } catch {
+                    return promise(.failure(error))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func fetchSearchOptionModelList(for modelGroupID: String) -> AnyPublisher<[CarSearchOptionItem]?, Error> {
+        Future<[CarSearchOptionItem]?, Error> { promise in
+            Task {
+                do {
+                    guard let dtoList = try await self.dataSource.fetchSearchOptionModelList(for: modelGroupID) else {
+                        return promise(.success(nil))
+                    }
+                    
+                    let list = dtoList.map {
+                        .init(name: $0.name, count: $0.count, optionID: $0.id)
+                    } as [CarSearchOptionItem]
+                } catch {
+                    return promise(.failure(error))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
 }

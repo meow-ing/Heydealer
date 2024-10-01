@@ -9,11 +9,13 @@ import UIKit
 import Combine
 
 class CarSearchOptionListViewController: UIViewController {
-
+    typealias Item = CarSearchOptionItem
+    
     private lazy var collectionView: UICollectionView = { setupCollectionView() }()
     private lazy var dataSource    = { configureDataSource() }()
 
-    private let viewModel: CardSearchOptionListViewModelInterface
+    private let viewModel  : CardSearchOptionListViewModelInterface
+    private var cancelBags = Set<AnyCancellable>()
     
     init(viewModel: CardSearchOptionListViewModelInterface) {
         self.viewModel = viewModel
@@ -34,7 +36,9 @@ extension CarSearchOptionListViewController {
         super.viewDidLoad()
 
         configureUI()
-        snapshotInitData()
+        bindViewModel()
+        
+        viewModel.fetchOptionList()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -44,13 +48,37 @@ extension CarSearchOptionListViewController {
     }
 }
 
+// MARK: view model
+private extension  CarSearchOptionListViewController {
+    
+    func bindViewModel() {
+        viewModel.optionList
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] list in
+                self?.snapshotData(list)
+            }.store(in: &cancelBags)
+        
+        viewModel.searchFlow
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] flow in
+                guard let self else { return }
+                
+                switch flow {
+                case .nextOption(let vm)  : self.pushNextSearchOptionListViewController(vm)
+                case .finishOption(let vm): break
+                }
+            }.store(in: &cancelBags)
+    }
+}
+
+
 // MARK: data
 private extension  CarSearchOptionListViewController {
     
-    func configureDataSource() -> UICollectionViewDiffableDataSource<Int, Int> {
+    func configureDataSource() -> UICollectionViewDiffableDataSource<Int, Item> {
         let cellRegistraion = cellRegistration()
                                               
-        let dataSource = UICollectionViewDiffableDataSource<Int, Int>(collectionView: collectionView) { collectionView, indexPath, item in
+        let dataSource = UICollectionViewDiffableDataSource<Int, Item>(collectionView: collectionView) { collectionView, indexPath, item in
             collectionView.dequeueConfiguredReusableCell(using: cellRegistraion, for: indexPath, item: item)
         }
         
@@ -65,14 +93,34 @@ private extension  CarSearchOptionListViewController {
         return dataSource
     }
     
-    func snapshotInitData() {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, Int>()
+    func snapshotData(_ optionList: [Item]?) {
+        var snapshot = NSDiffableDataSourceSnapshot<Int, Item>()
         
         snapshot.appendSections([0])
-        snapshot.appendItems([0, 1, 2, 3, 4, 5])
+        
+        if let optionList {
+            snapshot.appendItems(optionList)
+        }
         
         dataSource.apply(snapshot)
     }
+}
+
+// MARK: flow
+private extension CarSearchOptionListViewController {
+    
+    func pushNextSearchOptionListViewController(_ viewModel: CardSearchOptionListViewModelInterface) {
+        let viewController = CarSearchOptionListViewController(viewModel: viewModel)
+        
+        navigationController?.pushViewController(viewController, animated: true)
+    }
+    
+    func pushCarListViewController(_ viewModel: CarListViewModel) {
+        let viewController = CarListViewController(viewModel: viewModel)
+        
+        navigationController?.setViewControllers([viewController], animated: true)
+    }
+    
 }
 
 // MARK: configure ui
@@ -123,17 +171,19 @@ private extension CarSearchOptionListViewController {
         return .init(section: section)
     }
     
-    func cellRegistration() -> UICollectionView.CellRegistration<CarSearchOptionItemCell, Int> {
+    func cellRegistration() -> UICollectionView.CellRegistration<CarSearchOptionItemCell, Item> {
         .init { cell, indexPath, itemIdentifier in
-            
+            cell.nameLabel.text  = itemIdentifier.name
+            cell.countLabel.text = "\(itemIdentifier.count)" //todo bjy: 1000자리 넘어가면 콤마 표시해야하지만 패스
         }
     }
     
     func titleHeaderRegistration() -> (registration: UICollectionView.SupplementaryRegistration<CarSearchOptionTitleView>, kind: String) {
-        let kind = titleHeaderKind()
+        let kind  = titleHeaderKind()
+        let title = viewModel.title
         
-        return (UICollectionView.SupplementaryRegistration(elementKind: kind, handler: { supplementaryView, elementKind, indexPath in
-            
+        return (UICollectionView.SupplementaryRegistration(elementKind: kind, handler: { [title] supplementaryView, elementKind, indexPath in
+            supplementaryView.titleLabel.text = title
         }), kind)
     }
     

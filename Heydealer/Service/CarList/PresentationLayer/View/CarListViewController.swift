@@ -16,9 +16,19 @@ class CarListViewController: UIViewController {
     
     private lazy var dataSource = { configureDataSource() }()
     
-    private let viewModel  = CarListViewModel()
+    private let viewModel  : CarListViewModel
     private var cancelBags = Set<AnyCancellable>()
-
+    
+    init(viewModel: CarListViewModel) {
+        self.viewModel = viewModel
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
 }
 
 // MARK: override
