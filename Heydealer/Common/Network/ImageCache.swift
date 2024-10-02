@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 
+@MainActor
 struct ImageCache {
     
     private static let cacheTimeKey   = "image_cache_time"

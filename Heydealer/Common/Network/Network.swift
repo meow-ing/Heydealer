@@ -38,7 +38,7 @@ final class Network {
         guard let url, let urlComps = URLComponents(string: url.absoluteString) else { throw NetworkError.invalidURL }
         guard let host = urlComps.host else { throw NetworkError.invalidURL }
         
-        let cachedImageData = ImageCache.getImageData(for: url)
+        let cachedImageData = await ImageCache.getImageData(for: url)
         
         guard cachedImageData == nil else { return cachedImageData }
         
@@ -47,7 +47,7 @@ final class Network {
         let data = try await request(configuration: configuration)
         
         if let data {
-            ImageCache.cache(data, for: url)
+            await ImageCache.cache(data, for: url)
         }
         
         return data
