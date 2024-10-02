@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import CarService
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
